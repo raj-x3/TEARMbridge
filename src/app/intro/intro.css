@@ -19,8 +19,6 @@
   background: var(--bg);
   font: 14px/1.5 Inter, system-ui, sans-serif;
   color: var(--tx);
-  overflow-x: hidden;
-  padding-top: env(safe-area-inset-top, 0px);
   min-height: 100vh;
 }
 
@@ -75,12 +73,20 @@
   color: var(--tx);
 }
 
+.intro-page #pin {
+  height: 750vh;
+  position: relative;
+  width: 100%;
+}
+
 .intro-page #stage {
   height: 100vh;
   height: 100svh;
-  position: relative;
+  position: sticky;
+  top: 0;
   overflow: hidden;
   background: #F7F7F5;
+  width: 100%;
 }
 
 .intro-page .scn {

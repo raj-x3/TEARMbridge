@@ -14,6 +14,8 @@ export default function IntroductionPage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const timelineRef = useRef<gsap.core.Timeline | null>(null);
   const scrollTriggerRef = useRef<ScrollTrigger | null>(null);
+  const isAutoPlayingRef = useRef<boolean>(false);
+  const rafIdRef = useRef<number | null>(null);
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
@@ -66,7 +68,7 @@ export default function IntroductionPage() {
       "Payment|Reconciled",
     ];
 
-    const mob = window.innerWidth < 760;
+    const mob = typeof window !== "undefined" && window.innerWidth < 760;
     const ATM =
       `<div class="atm" aria-hidden="true">` +
       [
@@ -573,6 +575,8 @@ export default function IntroductionPage() {
             );
         } else {
           gsap.set(c, { autoAlpha: 1 });
+          gsap.set(w, { yPercent: 0 });
+          gsap.set(r, { autoAlpha: 1, y: 0 });
         }
 
         if (b !== undefined) {
@@ -582,8 +586,20 @@ export default function IntroductionPage() {
         }
       };
 
+      // Set Scene 01 visible immediately on load (zero flash of white)
       const G1 = G("g1");
       if (G1) gsap.set(G1, { autoAlpha: 1 });
+
+      const poEl = q(R1, ".po");
+      const agEl = q(R1, ".ag");
+      const amEl = q(R1, ".am");
+      const msEl = q(R1, ".ms");
+
+      if (poEl) gsap.set(poEl, { x: 0, z: 0, rotationY: 7, autoAlpha: 1, filter: "blur(0px)" });
+      if (agEl) gsap.set(agEl, { x: 0, z: -80, rotationY: -6, autoAlpha: 1, filter: "blur(0px)" });
+      if (amEl) gsap.set(amEl, { z: -200, y: 0, rotationY: -3, autoAlpha: 1, filter: "blur(0px)" });
+      if (msEl) gsap.set(msEl, { y: 0, x: 0, z: 40, rotationY: 4, autoAlpha: 1, filter: "blur(0px)" });
+      if (l1.length > 0) gsap.set(l1, { strokeDashoffset: 0 });
 
       io(G("g1"), null, 19.2);
       io(G("g3"), 19.8, 29.2);
@@ -604,44 +620,10 @@ export default function IntroductionPage() {
 
       const bo = "power4.out";
 
-      // S1 — fragmentation
-      const poEl = q(R1, ".po");
-      const agEl = q(R1, ".ag");
-      const amEl = q(R1, ".am");
-      const msEl = q(R1, ".ms");
-
-      if (poEl)
-        T.fromTo(
-          poEl,
-          { x: -420, z: -350, rotationY: 24, autoAlpha: 0, filter: "blur(8px)" },
-          { x: 0, z: 0, rotationY: 7, autoAlpha: 1, filter: "blur(0px)", duration: 3, ease: bo },
-          0.3
-        );
-      if (agEl)
-        T.fromTo(
-          agEl,
-          { x: 420, z: -650, rotationY: -24, autoAlpha: 0, filter: "blur(8px)" },
-          { x: 0, z: -80, rotationY: -6, autoAlpha: 1, filter: "blur(0px)", duration: 3, ease: bo },
-          1.2
-        );
-      if (amEl)
-        T.fromTo(
-          amEl,
-          { z: -900, y: 40, autoAlpha: 0, filter: "blur(8px)" },
-          { z: -200, y: 0, rotationY: -3, autoAlpha: 1, filter: "blur(0px)", duration: 2.6 },
-          2.6
-        );
-      if (msEl)
-        T.fromTo(
-          msEl,
-          { y: 160, x: -60, z: 60, autoAlpha: 0, filter: "blur(6px)" },
-          { y: 0, x: 0, z: 40, rotationY: 4, autoAlpha: 1, filter: "blur(0px)", duration: 2 },
-          4
-        );
-      if (l1.length > 0)
-        T.to(l1, { strokeDashoffset: 0, duration: 2, stagger: 0.3, ease: "none" }, 5.3);
-
-      T.fromTo(R1, { z: -40 }, { z: 90, duration: 10, ease: "none" }, 0);
+      // S1 — fragmentation & camera drift
+      if (poEl) T.to(poEl, { rotationY: 9, z: 20, duration: 6, ease: "none" }, 0);
+      if (agEl) T.to(agEl, { rotationY: -9, z: -50, duration: 6, ease: "none" }, 0);
+      T.fromTo(R1, { z: 0 }, { z: 90, duration: 10, ease: "none" }, 0);
 
       // S2 — connected workspace
       const l1Parents = l1.map((p) => p?.parentNode).filter(Boolean);
@@ -1054,8 +1036,7 @@ export default function IntroductionPage() {
           animation: T,
           trigger: pinEl,
           start: "top top",
-          end: () => "+=" + window.innerHeight * 7.5,
-          pin: stageEl,
+          end: "bottom bottom",
           scrub: 1.1,
           onUpdate: (s) => {
             if (barI) barI.style.width = s.progress * 100 + "%";
@@ -1068,8 +1049,86 @@ export default function IntroductionPage() {
         });
       }
 
+      // Smooth Auto-Tour Engine
+      const playBtn = $("#play-btn", container);
+      const playIcon = $("#play-icon", container);
+      const playText = $("#play-text", container);
+
+      const stopTour = () => {
+        isAutoPlayingRef.current = false;
+        if (rafIdRef.current) {
+          cancelAnimationFrame(rafIdRef.current);
+          rafIdRef.current = null;
+        }
+        if (playIcon) playIcon.textContent = "▶";
+        if (playText) playText.textContent = "AUTO-TOUR";
+      };
+
+      const startTour = () => {
+        if (!pinEl) return;
+        isAutoPlayingRef.current = true;
+        if (playIcon) playIcon.textContent = "⏸";
+        if (playText) playText.textContent = "PAUSE";
+
+        const totalScroll = pinEl.offsetHeight - window.innerHeight;
+        let lastTime = performance.now();
+
+        const tourLoop = (time: number) => {
+          if (!isAutoPlayingRef.current) return;
+          const dt = Math.min((time - lastTime) / 1000, 0.1);
+          lastTime = time;
+
+          const currentY = window.scrollY;
+          const step = (totalScroll / 20) * dt; // 20-second cinematic tour
+          const nextY = currentY + step;
+
+          if (nextY >= totalScroll) {
+            window.scrollTo({ top: totalScroll, behavior: "auto" });
+            stopTour();
+          } else {
+            window.scrollTo({ top: nextY, behavior: "auto" });
+            rafIdRef.current = requestAnimationFrame(tourLoop);
+          }
+        };
+
+        rafIdRef.current = requestAnimationFrame(tourLoop);
+      };
+
+      if (playBtn) {
+        playBtn.onclick = (e) => {
+          e.preventDefault();
+          if (isAutoPlayingRef.current) {
+            stopTour();
+          } else {
+            if (pinEl && window.scrollY >= pinEl.offsetHeight - window.innerHeight - 50) {
+              window.scrollTo({ top: 0, behavior: "auto" });
+            }
+            startTour();
+          }
+        };
+      }
+
+      // Stop auto-tour on manual wheel or touch interaction
+      window.addEventListener("wheel", () => {
+        if (isAutoPlayingRef.current) stopTour();
+      }, { passive: true });
+      window.addEventListener("touchstart", () => {
+        if (isAutoPlayingRef.current) stopTour();
+      }, { passive: true });
+
+      // Spacebar toggles auto-tour
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.code === "Space" && e.target === document.body) {
+          e.preventDefault();
+          if (isAutoPlayingRef.current) stopTour();
+          else startTour();
+        }
+      };
+      window.addEventListener("keydown", handleKeyDown);
+
       const top = (e: MouseEvent) => {
         e.preventDefault();
+        stopTour();
         window.scrollTo({ top: 0, behavior: "smooth" });
       };
 
@@ -1079,7 +1138,7 @@ export default function IntroductionPage() {
       if (ov) ov.onclick = top;
     };
 
-    const isReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const isReduced = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (isReduced) {
       document.documentElement.classList.add("rm");
       container.classList.add("rm");
@@ -1098,19 +1157,15 @@ export default function IntroductionPage() {
         };
       }
     } else {
-      if (document.fonts?.ready) {
-        document.fonts.ready.then(init);
-      } else {
-        init();
-      }
+      init();
     }
 
-    let W = window.innerWidth;
+    let W = typeof window !== "undefined" ? window.innerWidth : 1200;
     let rt: NodeJS.Timeout;
     const handleResize = () => {
       clearTimeout(rt);
       rt = setTimeout(() => {
-        if (Math.abs(window.innerWidth - W) > 40) {
+        if (typeof window !== "undefined" && Math.abs(window.innerWidth - W) > 40) {
           W = window.innerWidth;
           ScrollTrigger.refresh();
         }
@@ -1122,6 +1177,7 @@ export default function IntroductionPage() {
     return () => {
       window.removeEventListener("resize", handleResize);
       clearTimeout(rt);
+      if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current);
       if (scrollTriggerRef.current) {
         scrollTriggerRef.current.kill();
       }
@@ -1162,6 +1218,27 @@ export default function IntroductionPage() {
         <div id="bar">
           <i />
         </div>
+        <button
+          id="play-btn"
+          type="button"
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "6px",
+            padding: "5px 12px",
+            background: "#ffffff",
+            border: "1px solid #E5E7EB",
+            borderRadius: "20px",
+            fontSize: "11px",
+            fontWeight: 600,
+            color: "#171A20",
+            cursor: "pointer",
+            boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
+          }}
+        >
+          <span id="play-icon">▶</span>
+          <span id="play-text">AUTO-TOUR</span>
+        </button>
         <span>SCROLL TO EXPLORE</span>
       </div>
     </div>
