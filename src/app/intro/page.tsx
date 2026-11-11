@@ -1037,7 +1037,7 @@ export default function IntroductionPage() {
           trigger: pinEl,
           start: "top top",
           end: "bottom bottom",
-          scrub: 1.1,
+          scrub: 1.8,
           onUpdate: (s) => {
             if (barI) barI.style.width = s.progress * 100 + "%";
             const k = Math.min(7, Math.floor(s.progress * 8));
@@ -1079,7 +1079,7 @@ export default function IntroductionPage() {
           lastTime = time;
 
           const currentY = window.scrollY;
-          const step = (totalScroll / 20) * dt; // 20-second cinematic tour
+          const step = (totalScroll / 38) * dt; // 38-second relaxed cinematic tour
           const nextY = currentY + step;
 
           if (nextY >= totalScroll) {
