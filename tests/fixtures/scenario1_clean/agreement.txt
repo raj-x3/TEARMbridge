@@ -1,0 +1,16 @@
+MASTER COMMERCIAL SUPPLY AGREEMENT
+Agreement Reference: AGR-TEST-001
+Buyer: Acme Retail Corp.
+Supplier: Standard Supply Ltd.
+Effective Date: 2026-01-01
+Currency: USD
+
+1. COMMERCIAL TERMS
+1.1 Product: Industrial Widget Alpha
+1.2 Unit Price: $50.00 USD per unit.
+1.3 Minimum Order Quantity: 100 units.
+1.4 Volume Discount: 5% discount on orders of 100 units or more.
+1.5 Delivery: Delivery within 10 business days from order confirmation.
+1.6 Payment Terms: Net 30 days from invoice date.
+
+Signed: Standard Supply Ltd. / Acme Retail Corp.

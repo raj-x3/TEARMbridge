@@ -1,0 +1,17 @@
+PURCHASE ORDER PO-TEST-002
+PO Number: PO-TEST-002
+Referenced Agreement: AGR-TEST-002
+Buyer: Zenith Distribution Inc.
+Supplier: Standard Supply Ltd.
+Issue Date: 2026-04-10
+Currency: USD
+
+ORDER:
+Item: Commercial Units
+Quantity: 20 units
+Unit Price: $80.00 USD
+Total: $1,600.00 USD
+
+CONDITIONS:
+- Payment Terms: Net 60 days
+- Delivery: 5 business days

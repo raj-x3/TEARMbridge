@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -11,10 +11,63 @@ import { RecentTransactionsTable } from "@/components/overview/RecentTransaction
 import { ActivityTimelinePanel } from "@/components/overview/ActivityTimelinePanel";
 import { ImportPOModal } from "@/components/modals/ImportPOModal";
 import { getDerivedKPICards, DEMO_WORKSPACE_INFO } from "@/data/mockData";
+import { isSupabaseConfigured } from "@/lib/config";
+import { formatCurrency } from "@/lib/utils";
 
 export default function OverviewPage() {
   const [importModalOpen, setImportModalOpen] = useState(false);
-  const kpiCards = getDerivedKPICards();
+  const [kpiCards, setKpiCards] = useState(getDerivedKPICards());
+  const [merchantName, setMerchantName] = useState(DEMO_WORKSPACE_INFO.name);
+
+  useEffect(() => {
+    const isConf = isSupabaseConfigured();
+
+    if (isConf) {
+      fetch("/api/workspace/overview")
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success && data.data) {
+            const m = data.data.metrics;
+            if (m) {
+              setKpiCards([
+                {
+                  id: "review",
+                  label: "Agreements in review",
+                  value: String(m.agreementsInReviewCount).padStart(2, "0"),
+                  subtext: `${m.agreementsInReviewCount} commercial conflicts flagged`,
+                  status: "attention",
+                },
+                {
+                  id: "counterparty",
+                  label: "Awaiting counterparty",
+                  value: String(m.awaitingCounterpartyCount).padStart(2, "0"),
+                  subtext: "Avg. response time: 4.2 hours",
+                  status: "neutral",
+                },
+                {
+                  id: "invoice",
+                  label: "Ready to invoice",
+                  value: String(m.readyToInvoiceCount).padStart(2, "0"),
+                  subtext: "Terms validated and approved",
+                  status: "ready",
+                },
+                {
+                  id: "outstanding",
+                  label: "Outstanding value",
+                  value: formatCurrency(m.outstandingValue),
+                  subtext: `Across ${m.activeFlowsCount} active commercial flows`,
+                  status: "primary",
+                },
+              ]);
+            }
+            if (data.data.workspace?.name) {
+              setMerchantName(data.data.workspace.name);
+            }
+          }
+        })
+        .catch((err) => console.error("Error loading overview data:", err));
+    }
+  }, []);
 
   return (
     <div className="space-y-7">
@@ -33,7 +86,7 @@ export default function OverviewPage() {
           </div>
         </div>
         <div className="text-[11px] font-mono text-content-muted">
-          Active Merchant: <span className="text-content-primary font-medium">{DEMO_WORKSPACE_INFO.name}</span>
+          Active Merchant: <span className="text-content-primary font-medium">{merchantName}</span>
         </div>
       </div>
 

@@ -1,0 +1,14 @@
+PURCHASE ORDER PO-TEST-003
+PO Number: PO-TEST-003
+Referenced Agreement: AGR-TEST-003
+Buyer: Horizon Global LLC
+Supplier: Standard Supply Ltd.
+Issue Date: 2026-11-05
+Currency: USD
+
+ORDER:
+Item: Horizon Standard Equipment
+Quantity: 10 units
+Unit Price: $120.00 USD
+Total: $1,200.00 USD
+Payment Terms: Net 45 days

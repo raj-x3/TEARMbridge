@@ -1,0 +1,19 @@
+PURCHASE ORDER PO-TEST-001
+PO Number: PO-TEST-001
+Referenced Agreement: AGR-TEST-001
+Buyer: Acme Retail Corp.
+Supplier: Standard Supply Ltd.
+Issue Date: 2026-03-01
+Currency: USD
+
+ORDER SPECIFICATIONS:
+Item: Industrial Widget Alpha
+Quantity: 100 units
+Unit Price: $50.00 USD
+Discount: 5% discount
+Line Total: $4,750.00 USD
+Total Amount: $4,750.00 USD
+
+CONDITIONS:
+- Delivery: Delivery within 10 business days
+- Payment Terms: Net 30 days from invoice date

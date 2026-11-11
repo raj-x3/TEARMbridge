@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Search, Plus } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
 import { COUNTERPARTIES } from "@/data/mockData";
 import { useToast } from "@/components/ui/Toast";
+import { isSupabaseConfigured } from "@/lib/config";
 
 interface CounterpartyItem {
   id: string;
@@ -21,10 +22,41 @@ interface CounterpartyItem {
 }
 
 export default function CounterpartiesPage() {
-  const { success } = useToast();
+  const { success, error: toastError } = useToast();
   const [counterparties, setCounterparties] = useState<CounterpartyItem[]>(COUNTERPARTIES);
   const [query, setQuery] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [configured, setConfigured] = useState(false);
+
+  useEffect(() => {
+    const isConf = isSupabaseConfigured();
+    setConfigured(isConf);
+
+    if (isConf) {
+      fetch("/api/counterparties")
+        .then((res) => res.json())
+        .then((resData) => {
+          if (resData.success && resData.data && resData.data.length > 0) {
+            const mapped: CounterpartyItem[] = resData.data.map(
+              (item: { id: string; display_name: string; entity_type: string; notes?: string; email?: string }) => ({
+                id: item.id,
+                name: item.display_name,
+                type: item.entity_type === "supplier" ? "Supplier" : "Buyer",
+                contactPerson: item.notes || "Procurement Desk",
+                email: item.email || `contact@${item.display_name.toLowerCase().replace(/\s+/g, "")}.com`,
+                activeAgreements: 1,
+                totalVolume: "$0",
+                creditRating: "Tier A",
+                paymentPerformance: "Active partner",
+              })
+            );
+            setCounterparties(mapped);
+          }
+        })
+        .catch((err) => console.error("Error loading counterparties:", err));
+    }
+  }, []);
 
   // New counterparty form state
   const [name, setName] = useState("");
@@ -40,8 +72,60 @@ export default function CounterpartiesPage() {
       cp.email.toLowerCase().includes(query.toLowerCase())
   );
 
-  const handleAddCounterparty = () => {
+  const handleAddCounterparty = async () => {
     if (!name.trim()) return;
+
+    if (configured) {
+      setIsSubmitting(true);
+      try {
+        const payload = {
+          legal_name: name.trim(),
+          display_name: name.trim(),
+          entity_type: type.toLowerCase() === "supplier" ? "supplier" : "buyer",
+          email: email || `orders@${name.toLowerCase().replace(/\s+/g, "")}.com`,
+          notes: contactPerson || "Procurement Desk",
+          currency: "USD",
+        };
+
+        const res = await fetch("/api/counterparties", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          throw new Error(data.error || "Failed to persist counterparty.");
+        }
+
+        const newEntity: CounterpartyItem = {
+          id: data.data.id,
+          name: data.data.display_name,
+          type: data.data.entity_type === "supplier" ? "Supplier" : "Buyer",
+          contactPerson: contactPerson || "Procurement Desk",
+          email: data.data.email,
+          activeAgreements: 0,
+          totalVolume: "$0",
+          creditRating,
+          paymentPerformance: "Active record",
+        };
+
+        setCounterparties((prev) => [newEntity, ...prev]);
+        setModalOpen(false);
+        setName("");
+        setContactPerson("");
+        setEmail("");
+        success("Counterparty Saved to Database", `${newEntity.name} persisted in PostgreSQL counterparty directory.`);
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : "Failed to save counterparty";
+        toastError("Failed to save counterparty", msg);
+      } finally {
+        setIsSubmitting(false);
+      }
+      return;
+    }
+
+    // Demo mode local state fallback
     const newEntity: CounterpartyItem = {
       id: `cp-${counterparties.length + 1}`,
       name,
@@ -234,6 +318,7 @@ export default function CounterpartiesPage() {
               variant="primary"
               onClick={handleAddCounterparty}
               disabled={!name.trim()}
+              isLoading={isSubmitting}
             >
               Add to Directory
             </Button>

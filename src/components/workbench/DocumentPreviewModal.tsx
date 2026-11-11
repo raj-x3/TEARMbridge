@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { FileText, ShieldCheck } from "lucide-react";
+import { FileText, ShieldCheck, Download } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { SourceDocument } from "@/types";
@@ -116,6 +116,16 @@ export const DocumentPreviewModal: React.FC<DocumentPreviewModalProps> = ({
             Document ID: {document.id}
           </span>
           <div className="flex items-center gap-2">
+            <Button
+              variant="secondary"
+              size="sm"
+              icon={<Download className="w-3.5 h-3.5" />}
+              onClick={() => {
+                window.open(`/api/documents/${document.id}/download?redirect=true`, "_blank");
+              }}
+            >
+              Download
+            </Button>
             <Button variant="secondary" size="sm" onClick={onClose}>
               Close Viewer
             </Button>

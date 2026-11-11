@@ -15,6 +15,11 @@ import { TermsComparison } from "@/components/workbench/TermsComparison";
 import { ReviewPanel } from "@/components/workbench/ReviewPanel";
 import { ResolutionDrawer } from "@/components/workbench/ResolutionDrawer";
 import { DocumentPreviewModal } from "@/components/workbench/DocumentPreviewModal";
+import {
+  CommercialIntelligencePanel,
+  IntelligenceFinding,
+} from "@/components/workbench/CommercialIntelligencePanel";
+import { CommercialDecisionPanel } from "@/components/workbench/CommercialDecisionPanel";
 import { useToast } from "@/components/ui/Toast";
 import {
   COMMERCIAL_TERMS_AGR_1042,
@@ -67,6 +72,44 @@ export default function AgreementWorkbenchPage({
         prev.map((t) => (t.id === "term-3" ? { ...t, status: "matched" } : t))
       );
     }
+  };
+
+  const handleApplyFindingsToComparison = (newFindings: IntelligenceFinding[]) => {
+    setTerms((prev) => {
+      const updated = [...prev];
+      for (const f of newFindings) {
+        const existingIdx = updated.findIndex(
+          (t) =>
+            t.termName.toLowerCase().includes(f.term_label.toLowerCase()) ||
+            t.id.toLowerCase().includes(f.term_key.toLowerCase())
+        );
+        const matchStatus = f.finding_type === "matched" ? "matched" : "conflict";
+        if (existingIdx >= 0) {
+          updated[existingIdx] = {
+            ...updated[existingIdx],
+            status: matchStatus,
+            contractRequirement:
+              f.amendment_value?.value ||
+              f.agreement_value?.value ||
+              updated[existingIdx].contractRequirement,
+            buyerRequest:
+              f.purchase_order_value?.value || updated[existingIdx].buyerRequest,
+            notes: f.explanation,
+          };
+        } else {
+          updated.push({
+            id: `int-${f.id.slice(0, 8)}`,
+            termName: f.term_label,
+            contractRequirement:
+              f.amendment_value?.value || f.agreement_value?.value || "N/A",
+            buyerRequest: f.purchase_order_value?.value || "N/A",
+            status: matchStatus,
+            notes: f.explanation,
+          });
+        }
+      }
+      return updated;
+    });
   };
 
   const matchedCount = terms.filter((t) => t.status === "matched").length;
@@ -133,6 +176,22 @@ export default function AgreementWorkbenchPage({
           setPreviewDoc(doc);
           setDocPreviewModalOpen(true);
         }}
+      />
+
+      {/* GEMINI COMMERCIAL INTELLIGENCE ENGINE */}
+      <CommercialIntelligencePanel
+        agreementId={agreementId}
+        buyerName={buyerName}
+        poNumber={poNumber}
+        onApplyToComparison={handleApplyFindingsToComparison}
+        onOpenResolution={() => setResolutionDrawerOpen(true)}
+      />
+
+      {/* MODULE 4: COMMERCIAL DECISION & NEGOTIATION ENGINE */}
+      <CommercialDecisionPanel
+        agreementId={agreementId}
+        poNumber={poNumber}
+        buyerName={buyerName}
       />
 
       {/* Main Grid: B. Terms Comparison (Left 2 cols) & C. Review Panel (Right 1 col) */}

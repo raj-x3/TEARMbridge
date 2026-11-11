@@ -1,0 +1,160 @@
+{
+  "verified_at": "2026-11-11T08:01:42.488Z",
+  "run_id": "8f198224-f94b-44fc-88be-d58e02399dfa",
+  "model_id": "gemini-3.8-flash",
+  "model_provider": "google",
+  "thinking_level": "medium",
+  "total_duration_ms": 82863,
+  "token_usage": {
+    "aggregated_input_tokens": 3557,
+    "aggregated_output_tokens": 3982,
+    "combined_total_tokens": 7539,
+    "calls": [
+      {
+        "call": "extraction_master_agreement",
+        "model": "gemini-3.8-flash",
+        "input_tokens": 529,
+        "output_tokens": 656
+      },
+      {
+        "call": "extraction_amendment_01",
+        "model": "gemini-3.8-flash",
+        "input_tokens": 506,
+        "output_tokens": 642
+      },
+      {
+        "call": "extraction_purchase_order",
+        "model": "gemini-3.8-flash",
+        "input_tokens": 548,
+        "output_tokens": 911
+      },
+      {
+        "call": "commercial_reconciliation",
+        "model": "gemini-3.8-flash",
+        "input_tokens": 1974,
+        "output_tokens": 1773
+      }
+    ]
+  },
+  "findings_count": 5,
+  "summary": {
+    "overall_status": "matched",
+    "headline": "Commercial terms reconciled across agreement documents.",
+    "matched_count": 5,
+    "conflict_count": 0,
+    "missing_count": 0,
+    "ambiguous_count": 0
+  },
+  "operative_framework": {
+    "master_agreement_id": "AGR-1042",
+    "applicable_amendments": [],
+    "unresolved_amendments": []
+  },
+  "arithmetic_validation": {
+    "is_valid": true,
+    "calculated_total": "0.00",
+    "stated_total": "0.00"
+  },
+  "findings": [
+    {
+      "term_key": "commercial_term",
+      "term_label": "Commercial Term",
+      "finding_type": "matched",
+      "severity": "informational",
+      "explanation": "PO unit price of $120.00 USD matches the master agreement unit price of $120.00 USD.",
+      "evidence_verification": [
+        {
+          "source_ref": "DOC_agr-1042-mas_LINES_001_010",
+          "verification_status": "verified_exact",
+          "verification_method": "exact"
+        },
+        {
+          "source_ref": "DOC_agr-1042-po_LINES_011_015",
+          "verification_status": "verified_exact",
+          "verification_method": "exact"
+        }
+      ]
+    },
+    {
+      "term_key": "commercial_term",
+      "term_label": "Commercial Term",
+      "finding_type": "matched",
+      "severity": "informational",
+      "explanation": "PO order quantity of 10 units satisfies the master agreement minimum order quantity of 10 units.",
+      "evidence_verification": [
+        {
+          "source_ref": "DOC_agr-1042-mas_LINES_001_010",
+          "verification_status": "verified_exact",
+          "verification_method": "exact"
+        },
+        {
+          "source_ref": "DOC_agr-1042-po_LINES_011_015",
+          "verification_status": "verified_exact",
+          "verification_method": "exact"
+        }
+      ]
+    },
+    {
+      "term_key": "commercial_term",
+      "term_label": "Commercial Term",
+      "finding_type": "matched",
+      "severity": "informational",
+      "explanation": "PO payment terms of Net 45 days match the operative terms established under Amendment No. 1 (modifying Section 1.3 from Net 30 to Net 45 days, effective 2026-10-01).",
+      "evidence_verification": [
+        {
+          "source_ref": "DOC_agr-1042-mas_LINES_011_012",
+          "verification_status": "verified_exact",
+          "verification_method": "exact"
+        },
+        {
+          "source_ref": "DOC_agr-1042-amd_LINES_001_009",
+          "verification_status": "verified_normalized",
+          "verification_method": "normalized_whitespace"
+        },
+        {
+          "source_ref": "DOC_agr-1042-po_LINES_011_015",
+          "verification_status": "verified_exact",
+          "verification_method": "exact"
+        }
+      ]
+    },
+    {
+      "term_key": "commercial_term",
+      "term_label": "Commercial Term",
+      "finding_type": "matched",
+      "severity": "informational",
+      "explanation": "No discount terms were specified in the master agreement or amendments, and no discount was requested on the purchase order.",
+      "evidence_verification": [
+        {
+          "source_ref": "DOC_agr-1042-mas_LINES_001_010",
+          "verification_status": "verified_normalized",
+          "verification_method": "normalized_whitespace"
+        },
+        {
+          "source_ref": "DOC_agr-1042-po_LINES_011_015",
+          "verification_status": "verified_normalized",
+          "verification_method": "normalized_whitespace"
+        }
+      ]
+    },
+    {
+      "term_key": "commercial_term",
+      "term_label": "Commercial Term",
+      "finding_type": "matched",
+      "severity": "informational",
+      "explanation": "Neither the master agreement nor the purchase order defines specific delivery dates or timeline commitments.",
+      "evidence_verification": [
+        {
+          "source_ref": "DOC_agr-1042-mas_LINES_001_010",
+          "verification_status": "verified_normalized",
+          "verification_method": "normalized_whitespace"
+        },
+        {
+          "source_ref": "DOC_agr-1042-po_LINES_001_010",
+          "verification_status": "verified_normalized",
+          "verification_method": "normalized_whitespace"
+        }
+      ]
+    }
+  ]
+}

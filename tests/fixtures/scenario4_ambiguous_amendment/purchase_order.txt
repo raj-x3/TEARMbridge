@@ -1,0 +1,6 @@
+PURCHASE ORDER PO-TEST-004
+PO Number: PO-TEST-004
+Referenced Agreement: AGR-TEST-004
+Issue Date: 2026-06-01
+Payment Terms: Net 60 days
+Total: $2,000.00 USD

@@ -1,0 +1,11 @@
+MASTER COMMERCIAL AGREEMENT
+Agreement Reference: AGR-TEST-003
+Buyer: Horizon Global LLC
+Supplier: Standard Supply Ltd.
+Effective Date: 2026-01-01
+Currency: USD
+
+1. Commercial Terms
+1.1 Unit Price: $120.00 USD.
+1.2 Quantity: Minimum 10 units.
+1.3 Payment Terms: Net 30 days.

@@ -8,6 +8,7 @@ import { ImportPOModal } from "@/components/modals/ImportPOModal";
 import { ToastProvider } from "@/components/ui/Toast";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
+import { DemoModeBanner } from "@/components/auth/DemoModeBanner";
 
 export default function WorkspaceLayout({
   children,
@@ -44,6 +45,7 @@ export default function WorkspaceLayout({
 
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col min-w-0 lg:pl-[248px]">
+          <DemoModeBanner />
           <AppTopbar
             onOpenSearch={() => setCommandSearchOpen(true)}
             onOpenMobileMenu={() => setMobileSidebarOpen(true)}

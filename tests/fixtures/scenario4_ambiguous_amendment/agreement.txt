@@ -1,0 +1,10 @@
+MASTER SUPPLY CONTRACT
+Agreement Reference: AGR-TEST-004
+Buyer: Solstice Industrial
+Supplier: Standard Supply Ltd.
+Effective Date: 2026-03-01
+Currency: USD
+
+1. TERMS
+1.1 Payment Terms: Net 30 days strictly.
+1.2 Unit Price: $200.00 USD.

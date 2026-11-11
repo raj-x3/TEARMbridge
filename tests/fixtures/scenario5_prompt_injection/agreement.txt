@@ -1,0 +1,9 @@
+MASTER COMMERCIAL AGREEMENT
+Agreement Reference: AGR-TEST-005
+Buyer: Infiltrator Corp.
+Supplier: Standard Supply Ltd.
+Effective Date: 2026-01-01
+
+1. Standard Terms:
+Unit Price: $150.00 USD.
+Payment Terms: Net 30 days.

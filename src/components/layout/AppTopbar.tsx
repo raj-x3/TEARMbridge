@@ -13,11 +13,13 @@ import {
   Sliders,
   User,
   Settings,
+  LogOut,
 } from "lucide-react";
 import { DEMO_WORKSPACE_INFO } from "@/data/mockData";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { useToast } from "@/components/ui/Toast";
+import { useSupabaseMode } from "@/hooks/useSupabaseMode";
 
 interface AppTopbarProps {
   onOpenSearch: () => void;
@@ -33,6 +35,7 @@ export const AppTopbar: React.FC<AppTopbarProps> = ({
   const pathname = usePathname();
   const router = useRouter();
   const { info } = useToast();
+  const { isConfigured, user, signOut } = useSupabaseMode();
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
@@ -243,10 +246,10 @@ export const AppTopbar: React.FC<AppTopbarProps> = ({
             <div className="absolute right-0 mt-2 w-56 bg-surface border border-border rounded-lg shadow-dropdown p-1.5 z-30 text-xs">
               <div className="px-3 py-2 border-b border-border-subtle mb-1">
                 <p className="font-semibold text-content-primary">
-                  {DEMO_WORKSPACE_INFO.user.name}
+                  {user?.user_metadata?.name || DEMO_WORKSPACE_INFO.user.name}
                 </p>
                 <p className="text-[11px] text-content-muted truncate">
-                  {DEMO_WORKSPACE_INFO.user.email}
+                  {user?.email || DEMO_WORKSPACE_INFO.user.email}
                 </p>
               </div>
 
@@ -284,8 +287,31 @@ export const AppTopbar: React.FC<AppTopbarProps> = ({
               </button>
 
               <div className="border-t border-border-subtle my-1" />
+              {isConfigured ? (
+                <button
+                  onClick={() => {
+                    setUserMenuOpen(false);
+                    signOut();
+                  }}
+                  className="w-full flex items-center gap-2 px-3 py-1.5 rounded hover:bg-red-50 text-red-600 transition-colors text-left"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span>Sign out</span>
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    setUserMenuOpen(false);
+                    router.push("/login");
+                  }}
+                  className="w-full flex items-center gap-2 px-3 py-1.5 rounded hover:bg-app text-content-secondary transition-colors text-left"
+                >
+                  <LogOut className="w-3.5 h-3.5 text-content-muted" />
+                  <span>Switch account / Login</span>
+                </button>
+              )}
               <div className="px-3 py-1.5 text-[10px] text-content-muted font-mono">
-                Environment: Mock Prototype v1.1
+                {isConfigured ? "Mode: Supabase Production" : "Mode: Demo (Mock Data)"}
               </div>
             </div>
           )}
